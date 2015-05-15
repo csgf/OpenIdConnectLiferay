@@ -150,7 +150,7 @@ public class OpenIdConnectAutoLogin implements AutoLogin{
                             userGroupIds[0] = uGroup.getUserGroupId();
                             user = UserLocalServiceUtil.addUser(
                                     0, companyId, 
-                                    false, pass, pass,
+                                    true, null, null,
                                     false, nickName, 
                                     mail, 
                                     0, StringPool.BLANK, 
