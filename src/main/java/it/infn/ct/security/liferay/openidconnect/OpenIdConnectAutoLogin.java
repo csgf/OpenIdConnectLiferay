@@ -40,7 +40,10 @@ import it.infn.ct.security.liferay.openidconnect.utils.Authenticator;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.Enumeration;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -64,6 +67,7 @@ public class OpenIdConnectAutoLogin implements AutoLogin{
                 try {
                     request.getSession().setAttribute("LOGIN", authZ.getState());
                     response.sendRedirect(authZ.getAuthRequestURL());
+                    return null;
                 } catch (IOException ex) {
                     _log.error(ex);
                 }
@@ -74,6 +78,22 @@ public class OpenIdConnectAutoLogin implements AutoLogin{
                 _log.debug("Remote Authentication performed. Retrieve the token");
                 State state = (State) request.getSession().getAttribute("LOGIN");
                 
+/*
+                Enumeration pNames= request.getParameterNames();
+                while(pNames.hasMoreElements()){
+                    String name= (String) pNames.nextElement();
+                    _log.debug("Parameter "+name+"= "+request.getParameter(name));
+                    
+                }
+*/                
+                if(request.getParameter("error")!=null){
+                    try {
+                        response.sendRedirect("/not_authorised");
+                        return null;
+                    } catch (IOException ex) {
+                        _log.error(ex);
+                    }
+                }
                 
                 if(request.getParameter("code")!=null &&
                         request.getParameter("state")!=null){
@@ -135,7 +155,7 @@ public class OpenIdConnectAutoLogin implements AutoLogin{
                             }
                             else{
                                 if(userInfo.getName()!=null){
-                                    nickName= givenName.substring(0, 1)+familyName;
+                                    nickName= givenName.substring(0, 1)+familyName + (int)(10000*Math.random());
                                 }
                                 else{
                                     nickName= "egi_user_"+ (int)(10000*Math.random());
