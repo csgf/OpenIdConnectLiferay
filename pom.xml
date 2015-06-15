@@ -32,8 +32,8 @@
             <version>4.13</version>
         </dependency>
         <dependency>
-            <groupId>servletapi</groupId>
-            <artifactId>servletapi</artifactId>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
             <version>2.3</version>
             <scope>provided</scope>
         </dependency>
