@@ -17,8 +17,11 @@ can be configured.*
 
 Liferay is already installed and executing properly.
 
-Edit the file `src/main/java/it/infn/ct/security/liferay/openidconnect/utils/Authenticator.java` modifying
-the client-id, the secret and the callback using the information provided by the OpenId Connect server you
+Edit the file
+
+    src/main/java/it/infn/ct/security/liferay/openidconnect/utils/Authenticator.java
+
+to modify the client-id, the secret and the callback using the information provided by the OpenId Connect server you
 want to use.
 
 Create the package with [maven](https://maven.apache.org) executing the command:
