@@ -1,10 +1,7 @@
 # OpenId Connect for Liferay
 
 [![Travis](http://img.shields.io/travis/csgf/OpenIdConnectLiferay/master.png)](https://travis-ci.org/fmarco76/OpenIdConnectLiferay)
-
-
 [![Documentation Status](https://readthedocs.org/projects/csgf/badge/?version=latest)](http://csgf.readthedocs.org)
-
 [![License](https://img.shields.io/github/license/csgf/OpenIdConnectLiferay.svg?style?flat)](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 OpenId Connect for Liferay is a very rough but effective implementation of the
