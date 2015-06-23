@@ -1,6 +1,11 @@
 # OpenId Connect for Liferay
 
-[![Travis](http://img.shields.io/travis/fmarco76/OpenIdConnectLiferay/master.png)](https://travis-ci.org/fmarco76/OpenIdConnectLiferay)
+[![Travis](http://img.shields.io/travis/csgf/OpenIdConnectLiferay/master.png)](https://travis-ci.org/fmarco76/OpenIdConnectLiferay)
+
+
+[![Documentation Status](https://readthedocs.org/projects/csgf/badge/?version=latest)](http://csgf.readthedocs.org)
+
+[![License](https://img.shields.io/github/license/csgf/OpenIdConnectLiferay.svg?style?flat)](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 OpenId Connect for Liferay is a very rough but effective implementation of the
 OpenId connect protocol for Liferay. Using this class it is possible to authenticate
@@ -27,7 +32,7 @@ want to use.
 Create the package with [maven](https://maven.apache.org) executing the command:
 
     $ mvn clean install
- 
+
 Maven will create two jar files Inside the directory `target`, copy `OpenIdConnectLiferay-0.1-jar-with-dependencies.jar`
 inside the lib directory of Liferay (locate Liferay inside your application server, this will
 contain the directory `WEB-INF/lib` where copy the jar).
