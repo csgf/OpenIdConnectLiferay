@@ -71,8 +71,6 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Date;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -145,12 +143,12 @@ public class Authenticator {
         authC = new ClientSecretBasic(new ClientID("xxxxxxxxxxxxxx"), new Secret("xxxxxxxx"));
         this.state = state;
         try {
-//            callback = new URI("https://csgf.egi.eu/c/portal/login");
-            callback = new URI("http://burns.ct.infn.it/c/portal/login");
+            callback = new URI("https://csgf.egi.eu/c/portal/login");
+//            callback = new URI("http://burns.ct.infn.it/c/portal/login");
             oauthS = new URI("https://unity.egi.eu/oauth2-as/oauth2-authz");
             tokenS = new URI("https://unity.egi.eu/oauth2/token");
             userS = new URI("https://unity.egi.eu/oauth2/userinfo");
-            tokenCertSign = new URI("https://unity.egi.eu:443/oauth2/jwk");
+            tokenCertSign = new URI("https://unity.egi.eu/oauth2/jwk");
             issuer = "https://unity.egi.eu/oauth2";
             aud = "unity-oauth-sg"; 
         } catch (URISyntaxException ex) {
