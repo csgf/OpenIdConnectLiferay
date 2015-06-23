@@ -1,20 +1,10 @@
-# OpenId Connect for Liferay
+# OPENID CONNECT FOR LIFERAY
 
-[![Travis](http://img.shields.io/travis/csgf/OpenIdConnectLiferay/master.png)](https://travis-ci.org/csgf/OpenIdConnectLiferay)
-[![Documentation Status](https://readthedocs.org/projects/csgf/badge/?version=latest)](http://csgf.readthedocs.org)
-[![License](https://img.shields.io/github/license/csgf/OpenIdConnectLiferay.svg?style?flat)](http://www.apache.org/licenses/LICENSE-2.0.txt)
+## About
 
 OpenId Connect for Liferay is a very rough but effective implementation of the
 OpenId connect protocol for Liferay. Using this class it is possible to
 authenticate with any OpenId proider specified in the code.
-
-*__Note__: this code is a proof of concept and in the future the code for OpenId
-connect will be integrated in the portlet
-[federated-login-ext](https://github.com/csgf/federated-login-ext) which
-already includes SAML based protocols. The advantage is that the portlet will
-provide a configuration panel where the provider and other useful information
-can be configured.*
-
 
 ## Installation
 
@@ -26,7 +16,12 @@ Edit the file
     src/main/java/it/infn/ct/security/liferay/openidconnect/utils/Authenticator.java
 
 to modify the client-id, the secret and the callback using the information
-provided by the OpenId Connect server you want to use.
+provided by the OpenId Connect server you want to use. The other values
+reference to the *[EGI access portal authentication
+service](https://access.egi.eu)*. If you plan to use a different *OpenID Connect
+provider* the urls to the service need to be modified with the values provided
+by your provider (this version does not use service description so all the urls
+should be modified).
 
 Create the package with [maven](https://maven.apache.org) executing the command:
 
@@ -50,3 +45,21 @@ the URL:
 This allow to authente users using the sign-in link in the page. If you access a
 protected page or open the login portlet the login form still is available. It
 is suggested to disable the portlet if you plan to use only OpenId Connect.
+
+
+## Usage
+
+Users have to sign-in to the portal using the provided link *Sign-in* as
+explained in the section [Installation](#installation). The only difference is
+that the other sign-in procedure must be disabled so the user cannot see the
+login for sh/she is used to.
+
+## Contributors
+
+* [Marco Fargetta](https://github.com/fmarco76/)
+
+### Contribution
+
+A revised version of this repository will be merged with the
+[federated-login-ext repository](https://github.com/csgf/federated-login-ext)
+therefore new contribution should go to that.
