@@ -27,15 +27,24 @@ Create the package with [maven](https://maven.apache.org) executing the command:
 
     $ mvn clean install
 
-Maven will create two jar files Inside the directory `target`, copy
-`OpenIdConnectLiferay-0.1-jar-with-dependencies.jar` inside the lib directory of
-Liferay (locate Liferay inside your application server, this will contain the
-directory `WEB-INF/lib` where copy the jar).
+Maven will create two jar files Inside the directory `target`, one including
+all dependencies (with *with-depencies* suffix) and the other without. Copy the
+one with dependencies inside the lib directory of Liferay (locate Liferay inside
+your application server, this will contain the directory `WEB-INF/lib` where
+copy the jar).
 
 Edit the Liferay file portal-ext.properties (if you have not create a new one in
 `WEB-INF/classes`) and add the new AutoLogin class:
 
-    auto.login.hooks=it.infn.ct.security.liferay.openidconnect.OpenIdConnectAutoLogin,com.liferay.portal.security.auth.CASAutoLogin,com.liferay.portal.security.auth.FacebookAutoLogin,com.liferay.portal.security.auth.NtlmAutoLogin,com.liferay.portal.security.auth.OpenIdAutoLogin,com.liferay.portal.security.auth.OpenSSOAutoLogin,com.liferay.portal.security.auth.RememberMeAutoLogin,com.liferay.portal.security.auth.SiteMinderAutoLogin
+    auto.login.hooks=\
+      it.infn.ct.security.liferay.openidconnect.OpenIdConnectAutoLogin,\
+      com.liferay.portal.security.auth.CASAutoLogin,\
+      com.liferay.portal.security.auth.FacebookAutoLogin,\
+      com.liferay.portal.security.auth.NtlmAutoLogin,\
+      com.liferay.portal.security.auth.OpenIdAutoLogin,\
+      com.liferay.portal.security.auth.OpenSSOAutoLogin,\
+      com.liferay.portal.security.auth.RememberMeAutoLogin,\
+      com.liferay.portal.security.auth.SiteMinderAutoLogin
 
 Finally, edit the sign-in link in your theme in order to redirect the user to
 the URL:
