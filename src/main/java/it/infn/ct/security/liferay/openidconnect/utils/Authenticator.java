@@ -25,6 +25,7 @@ import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.security.auth.AuthException;
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.ReadOnlyJWTClaimsSet;
@@ -71,6 +72,8 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Date;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -176,7 +179,7 @@ public class Authenticator {
         return null;
     }
     
-    public UserInfo getUserInfo(HttpServletRequest request) throws AuthException{
+    public UserInfo getUserInfo(HttpServletRequest request) throws AuthException {
         AuthenticationResponse resp = null;
         
         try {

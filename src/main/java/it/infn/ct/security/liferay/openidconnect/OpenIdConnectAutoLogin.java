@@ -40,10 +40,7 @@ import it.infn.ct.security.liferay.openidconnect.utils.Authenticator;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.Enumeration;
 import java.util.Locale;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -150,8 +147,8 @@ public class OpenIdConnectAutoLogin implements AutoLogin{
                                 givenName = "EGI";
                                 familyName = "USER "+ (int)(10000*Math.random());
                             }
-                            if(userInfo.getNickname()!=null){
-                                nickName= userInfo.getNickname();
+                            if(userInfo.getPreferredUsername()!=null){
+                                nickName= userInfo.getPreferredUsername();
                             }
                             else{
                                 if(userInfo.getName()!=null){
@@ -173,7 +170,7 @@ public class OpenIdConnectAutoLogin implements AutoLogin{
                                     true, null, null,
                                     false, nickName, 
                                     mail, 
-                                    0, StringPool.BLANK, 
+                                    0, userInfo.getSubject().getValue()+"_at_egi_unity", 
                                     Locale.ENGLISH, 
                                     givenName, StringPool.BLANK, familyName,
                                     0, 0, true, 
