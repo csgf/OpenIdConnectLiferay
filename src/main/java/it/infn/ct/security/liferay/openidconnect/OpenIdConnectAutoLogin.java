@@ -102,6 +102,7 @@ public class OpenIdConnectAutoLogin implements AutoLogin{
                     try {
                         userInfo = authZ.getUserInfo(request);
                         
+                        _log.debug("User Information: givenName='"+userInfo.getGivenName()+"' familyName='"+userInfo.getFamilyName()+"' globalName='"+userInfo.getName()+"'");
                     } catch (AuthException ex) {
                         _log.error(ex);
                         return null;
@@ -126,29 +127,39 @@ public class OpenIdConnectAutoLogin implements AutoLogin{
                             String familyName;
                             String nickName;
                             
-                            givenName = userInfo.getName();
+                            if(userInfo.getGivenName()==null || userInfo.getGivenName().isEmpty()){
+                                givenName = userInfo.getName();
+                            }
+                            else{
+                                givenName = userInfo.getGivenName();
+                            }
                             
-                            if(givenName!=null){
-                                if(userInfo.getFamilyName()!=null){
+                            if(givenName!=null && !givenName.isEmpty()){
+                                if(userInfo.getFamilyName()!=null && !userInfo.getFamilyName().isEmpty()){
                                     familyName = userInfo.getFamilyName();
                                 }
                                 else{
-                                    String[] names= givenName.split(" ");
-                                    givenName= "";
-                                    for(int i=0; i<names.length-1; i++){
-                                        givenName+=names[i];
-                                        if(1<names.length-2)
-                                            givenName+=" ";
+                                    if(givenName.contains(" ")){
+                                        String[] names= givenName.split(" ");
+                                        givenName= "";
+                                        for(int i=0; i<names.length-1; i++){
+                                            givenName+=names[i];
+                                            if(1<names.length-2)
+                                                givenName+=" ";
+                                        }
+                                        familyName= names[names.length-1];
                                     }
-                                    familyName= names[names.length-1];
+                                    else{
+                                        familyName= givenName;
+                                    }
                                 }
                             }
                             else{
                                 givenName = "EGI";
                                 familyName = "USER "+ (int)(10000*Math.random());
                             }
-                            if(userInfo.getPreferredUsername()!=null){
-                                nickName= userInfo.getPreferredUsername();
+                            if(userInfo.getSubject()!=null){
+                                nickName= userInfo.getSubject().getValue();
                             }
                             else{
                                 if(userInfo.getName()!=null){
@@ -168,7 +179,7 @@ public class OpenIdConnectAutoLogin implements AutoLogin{
                             user = UserLocalServiceUtil.addUser(
                                     0, companyId, 
                                     true, null, null,
-                                    false, nickName, 
+                                    false, userInfo.getSubject().getValue(), 
                                     mail, 
                                     0, userInfo.getSubject().getValue()+"_at_egi_unity", 
                                     Locale.ENGLISH, 
