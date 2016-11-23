@@ -101,8 +101,19 @@ public class OpenIdConnectAutoLogin implements AutoLogin{
                     UserInfo userInfo = null;
                     try {
                         userInfo = authZ.getUserInfo(request);
+                        _log.debug("User Information: givenName='"+userInfo.getGivenName()+"' familyName='"+userInfo.getFamilyName()+
+                                "' globalName='"+userInfo.getName()+"' hasActiveSla='"+userInfo.getClaim("hasActiveSla", String.class)+
+                                "' confirmedRegistration='" +userInfo.getClaim("confirmedRegistration", String.class)+"'");
+                        if(!userInfo.getClaim("hasActiveSla", String.class).equalsIgnoreCase("true") ||
+                                !userInfo.getClaim("confirmedRegistration", String.class).equalsIgnoreCase("true")) {
+                            try {
+                                response.sendRedirect("/not_authorised");
+                                return null;
+                            } catch (IOException ex) {
+                                _log.error(ex);
+                            }                            
+                        }
                         
-                        _log.debug("User Information: givenName='"+userInfo.getGivenName()+"' familyName='"+userInfo.getFamilyName()+"' globalName='"+userInfo.getName()+"'");
                     } catch (AuthException ex) {
                         _log.error(ex);
                         return null;
