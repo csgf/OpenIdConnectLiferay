@@ -140,7 +140,7 @@ public class Authenticator {
     }
     
     public Authenticator(State state) {
-        authC = new ClientSecretBasic(new ClientID("xxxxxxxxxxxxxx"), new Secret("xxxxxxxx"));
+        authC = new ClientSecretBasic(new ClientID("xxxxxxxxxxxxxx"), new Secret("xxxxxxxxxxxxxx"));
         this.state = state;
         try {
             callback = new URI("https://csgf.egi.eu/c/portal/login");
@@ -162,7 +162,7 @@ public class Authenticator {
         AuthenticationRequest req = new AuthenticationRequest(
                 oauthS,
                 new ResponseType(ResponseType.Value.CODE),
-                Scope.parse("profile openid"),
+                Scope.parse("profile openid additional"),
                 authC.getClientID(),
                 callback,
                 state,

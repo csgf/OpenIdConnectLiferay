@@ -136,7 +136,6 @@ public class OpenIdConnectAutoLogin implements AutoLogin{
                             
                             String givenName;
                             String familyName;
-                            String nickName;
                             
                             if(userInfo.getGivenName()==null || userInfo.getGivenName().isEmpty()){
                                 givenName = userInfo.getName();
@@ -169,19 +168,8 @@ public class OpenIdConnectAutoLogin implements AutoLogin{
                                 givenName = "EGI";
                                 familyName = "USER "+ (int)(10000*Math.random());
                             }
-                            if(userInfo.getSubject()!=null){
-                                nickName= userInfo.getSubject().getValue();
-                            }
-                            else{
-                                if(userInfo.getName()!=null){
-                                    nickName= givenName.substring(0, 1)+familyName + (int)(10000*Math.random());
-                                }
-                                else{
-                                    nickName= "egi_user_"+ (int)(10000*Math.random());
-                                }
-                            }
                                 
-                            _log.info("New user "+givenName+" "+familyName+" "+mail+" (detto "+nickName+")");
+                            _log.info("New user "+givenName+" "+familyName+" "+mail+" (id "+userInfo.getStringClaim("persistent")+")");
                             SecureRandom random = new SecureRandom();
                             String pass = new BigInteger(130, random).toString(32);
                             UserGroup uGroup = UserGroupLocalServiceUtil.getUserGroup(companyId, "UnityUser");
@@ -190,9 +178,9 @@ public class OpenIdConnectAutoLogin implements AutoLogin{
                             user = UserLocalServiceUtil.addUser(
                                     0, companyId, 
                                     true, null, null,
-                                    false, userInfo.getSubject().getValue(), 
+                                    false, userInfo.getStringClaim("persistent"), 
                                     mail, 
-                                    0, userInfo.getSubject().getValue()+"_at_egi_unity", 
+                                    0, userInfo.getStringClaim("persistent")+"_at_egi_unity", 
                                     Locale.ENGLISH, 
                                     givenName, StringPool.BLANK, familyName,
                                     0, 0, true, 
