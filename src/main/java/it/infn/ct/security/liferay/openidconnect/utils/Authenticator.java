@@ -140,17 +140,17 @@ public class Authenticator {
     }
     
     public Authenticator(State state) {
-        authC = new ClientSecretBasic(new ClientID("xxxxxxxxxxxxxx"), new Secret("xxxxxxxxxxxxxx"));
+        authC = new ClientSecretBasic(new ClientID("csgf"), new Secret("*************************************************"));
         this.state = state;
         try {
             callback = new URI("https://csgf.egi.eu/c/portal/login");
-//            callback = new URI("http://burns.ct.infn.it/c/portal/login");
-            oauthS = new URI("https://unity.egi.eu/oauth2-as/oauth2-authz");
-            tokenS = new URI("https://unity.egi.eu/oauth2/token");
-            userS = new URI("https://unity.egi.eu/oauth2/userinfo");
-            tokenCertSign = new URI("https://unity.egi.eu/oauth2/jwk");
-            issuer = "https://unity.egi.eu/oauth2";
-            aud = "unity-oauth-sg"; 
+            oauthS = new URI("https://aai-dev.egi.eu/oidc/authorize");
+            tokenS = new URI("https://aai-dev.egi.eu/oidc/token");
+            userS = new URI("https://aai-dev.egi.eu/oidc/userinfo");
+            tokenCertSign = new URI("https://aai-dev.egi.eu/oidc/jwk");
+            issuer = "https://aai-dev.egi.eu/oidc/";
+            aud = "csgf"; 
+
         } catch (URISyntaxException ex) {
             _log.error(ex);
         }
@@ -162,7 +162,7 @@ public class Authenticator {
         AuthenticationRequest req = new AuthenticationRequest(
                 oauthS,
                 new ResponseType(ResponseType.Value.CODE),
-                Scope.parse("profile openid additional"),
+                Scope.parse("profile openid email"),
                 authC.getClientID(),
                 callback,
                 state,
@@ -330,7 +330,7 @@ public class Authenticator {
             
             for(Object key: keyList){
                 JSONObject obj = (JSONObject) key;
-                if(obj.get("use").equals("sig") && obj.get("kty").equals("RSA")){
+                if(obj.get("kty").equals("RSA")){
                     return obj;
                 }
             }

@@ -74,15 +74,7 @@ public class OpenIdConnectAutoLogin implements AutoLogin{
             if(request.getSession().getAttribute("LOGIN") != null){
                 _log.debug("Remote Authentication performed. Retrieve the token");
                 State state = (State) request.getSession().getAttribute("LOGIN");
-                
-/*
-                Enumeration pNames= request.getParameterNames();
-                while(pNames.hasMoreElements()){
-                    String name= (String) pNames.nextElement();
-                    _log.debug("Parameter "+name+"= "+request.getParameter(name));
-                    
-                }
-*/                
+
                 if(request.getParameter("error")!=null){
                     try {
                         response.sendRedirect("/not_authorised");
@@ -101,11 +93,10 @@ public class OpenIdConnectAutoLogin implements AutoLogin{
                     UserInfo userInfo = null;
                     try {
                         userInfo = authZ.getUserInfo(request);
-                        _log.debug("User Information: givenName='"+userInfo.getGivenName()+"' familyName='"+userInfo.getFamilyName()+
-                                "' globalName='"+userInfo.getName()+"' hasActiveSla='"+userInfo.getClaim("hasActiveSla", String.class)+
-                                "' confirmedRegistration='" +userInfo.getClaim("confirmedRegistration", String.class)+"'");
-                        if(!userInfo.getClaim("hasActiveSla", String.class).equalsIgnoreCase("true") ||
-                                !userInfo.getClaim("confirmedRegistration", String.class).equalsIgnoreCase("true")) {
+                        if(!(userInfo.getStringListClaim("edu_person_entitlements").contains("urn:mace:egi.eu:aai.egi.eu:member@vo.access.egi.eu") &&
+                                userInfo.getStringListClaim("edu_person_entitlements").contains("urn:mace:egi.eu:aai.egi.eu:vm_operator@vo.access.egi.eu")) &&
+                                !(userInfo.getStringListClaim("edu_person_entitlements").contains("urn:mace:egi.eu:unity.egi.eu:member@vo.access.egi.eu") &&
+                                userInfo.getStringListClaim("edu_person_entitlements").contains("urn:mace:egi.eu:unity.egi.eu:vm_operator@vo.access.egi.eu"))) {
                             try {
                                 response.sendRedirect("/not_authorised");
                                 return null;
@@ -172,7 +163,7 @@ public class OpenIdConnectAutoLogin implements AutoLogin{
                             _log.info("New user "+givenName+" "+familyName+" "+mail+" (id "+userInfo.getStringClaim("persistent")+")");
                             SecureRandom random = new SecureRandom();
                             String pass = new BigInteger(130, random).toString(32);
-                            UserGroup uGroup = UserGroupLocalServiceUtil.getUserGroup(companyId, "UnityUser");
+                            UserGroup uGroup = UserGroupLocalServiceUtil.getUserGroup(companyId, "EGIUsers");
                             long [] userGroupIds = new long[1];
                             userGroupIds[0] = uGroup.getUserGroupId();
                             user = UserLocalServiceUtil.addUser(
@@ -180,7 +171,7 @@ public class OpenIdConnectAutoLogin implements AutoLogin{
                                     true, null, null,
                                     false, userInfo.getStringClaim("persistent"), 
                                     mail, 
-                                    0, userInfo.getStringClaim("persistent")+"_at_egi_unity", 
+                                    0, userInfo.getStringClaim("persistent")+"_at_egi", 
                                     Locale.ENGLISH, 
                                     givenName, StringPool.BLANK, familyName,
                                     0, 0, true, 
