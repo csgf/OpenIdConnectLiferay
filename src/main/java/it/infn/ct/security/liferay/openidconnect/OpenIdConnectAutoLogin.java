@@ -158,27 +158,25 @@ public class OpenIdConnectAutoLogin implements AutoLogin{
                                 familyName = "USER "+ (int)(10000*Math.random());
                             }
                                 
-                            _log.info("New user "+givenName+" "+familyName+" "+mail+" (id "+userInfo.getStringClaim("persistent")+")");
+                            _log.info("New user "+givenName+" "+familyName+" "+mail+" (id "+userInfo.getStringClaim("sub")+")");
                             SecureRandom random = new SecureRandom();
                             String pass = new BigInteger(130, random).toString(32);
                             UserGroup uGroup = UserGroupLocalServiceUtil.getUserGroup(companyId, "EGIUsers");
                             long [] userGroupIds = new long[1];
                             userGroupIds[0] = uGroup.getUserGroupId();
                             user = UserLocalServiceUtil.addUser(
-                                    0, companyId, 
+                                    0, companyId,
                                     true, null, null,
-                                    false, userInfo.getStringClaim("persistent"), 
-                                    mail, 
-                                    0, userInfo.getStringClaim("persistent")+"_at_egi", 
-                                    Locale.ENGLISH, 
+                                    false, userInfo.getStringClaim("sub").replace('@', '_'),
+                                    mail,
+                                    0, userInfo.getStringClaim("sub"),
+                                    Locale.ENGLISH,
                                     givenName, StringPool.BLANK, familyName,
-                                    0, 0, true, 
-                                    1, 1, 1970, 
-                                    StringPool.BLANK, null, 
+                                    0, 0, true,
+                                    1, 1, 1970,
+                                    StringPool.BLANK, null,
                                     null, null, userGroupIds,
                                     false, null);
-
-                            
                         }
                         credentials = new String[3];
 
