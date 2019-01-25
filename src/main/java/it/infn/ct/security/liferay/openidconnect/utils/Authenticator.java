@@ -138,18 +138,18 @@ public class Authenticator {
     public Authenticator(){
         this(new State());
     }
-    
+
     public Authenticator(State state) {
         authC = new ClientSecretBasic(new ClientID("csgf"), new Secret("*************************************************"));
         this.state = state;
         try {
             callback = new URI("https://csgf.egi.eu/c/portal/login");
-            oauthS = new URI("https://aai-dev.egi.eu/oidc/authorize");
-            tokenS = new URI("https://aai-dev.egi.eu/oidc/token");
-            userS = new URI("https://aai-dev.egi.eu/oidc/userinfo");
-            tokenCertSign = new URI("https://aai-dev.egi.eu/oidc/jwk");
-            issuer = "https://aai-dev.egi.eu/oidc/";
-            aud = "csgf"; 
+            oauthS = new URI("https://aai.egi.eu/oidc/authorize");
+            tokenS = new URI("https://aai.egi.eu/oidc/token");
+            userS = new URI("https://aai.egi.eu/oidc/userinfo");
+            tokenCertSign = new URI("https://aai.egi.eu/oidc/jwk");
+            issuer = "https://aai.egi.eu/oidc/";
+            aud = "csgf";
 
         } catch (URISyntaxException ex) {
             _log.error(ex);
@@ -162,7 +162,7 @@ public class Authenticator {
         AuthenticationRequest req = new AuthenticationRequest(
                 oauthS,
                 new ResponseType(ResponseType.Value.CODE),
-                Scope.parse("profile openid email"),
+                Scope.parse("profile openid email eduperson_entitlement"),
                 authC.getClientID(),
                 callback,
                 state,
@@ -175,10 +175,10 @@ public class Authenticator {
         }
         return null;
     }
-    
+
     public UserInfo getUserInfo(HttpServletRequest request) throws AuthException {
         AuthenticationResponse resp = null;
-        
+
         try {
             resp = AuthenticationResponseParser.parse(
                     new URI(request.getRequestURL().append("?").append(request.getQueryString()).toString())
@@ -188,24 +188,24 @@ public class Authenticator {
         } catch (URISyntaxException ex) {
             _log.error(ex);
         }
-        
+
         if (resp==null || resp instanceof AuthenticationErrorResponse)
             throw new AuthException("OpenId Connect server does not authenticate");
-        
+
         AuthenticationSuccessResponse succesResp = (AuthenticationSuccessResponse) resp;
-        
+
         if(!verifyState(succesResp.getState()))
             throw new AuthException("OpenId Connect server does not authenticate");
-        
+
         AuthorizationCode code = succesResp.getAuthorizationCode();
-        
+
         TokenRequest tokenReq = new TokenRequest(
                 tokenS,
                 authC,
                 new AuthorizationCodeGrant(code, callback)
         );
         HTTPResponse tokenHTTPResp = null;
-        
+
         try {
             _log.debug("Token request header content: "+tokenReq.toHTTPRequest().getHeader("Content-Type"));
             _log.debug("Token request header authorisation: "+tokenReq.toHTTPRequest().getHeader("Authorization"));
@@ -216,7 +216,7 @@ public class Authenticator {
         } catch (IOException ex) {
             _log.error(ex);
         }
-        
+
         TokenResponse tokenResp = null;
         try {
             _log.debug("Token response: "+tokenHTTPResp.getContent());
@@ -224,13 +224,13 @@ public class Authenticator {
         } catch (ParseException ex) {
             _log.error(ex);
         }
-        
+
         if(tokenResp == null || tokenResp instanceof TokenErrorResponse){
             throw new AuthException("OpenId Connect server does not authenticate");
         }
-        
+
         RSAPublicKey providerKey= null;
-        
+
         JSONObject key;
         try {
             key = getProviderRSAKey(tokenCertSign.toURL().openStream());
@@ -246,9 +246,9 @@ public class Authenticator {
         } catch (InvalidKeySpecException ex) {
             _log.error(ex);
         }
-        
+
         OIDCAccessTokenResponse accessTokenResponse = (OIDCAccessTokenResponse) tokenResp;
-        
+
         DefaultJWTDecoder jwtDec = new DefaultJWTDecoder();
         jwtDec.addJWSVerifier(new RSASSAVerifier(providerKey));
         ReadOnlyJWTClaimsSet claims=null;
@@ -260,28 +260,28 @@ public class Authenticator {
         } catch (java.text.ParseException ex) {
             _log.error(ex);
         }
-        
+
         if(claims==null){
             throw new AuthException("Not able to decode the ID Token");
         }
-        
+
         if(claims.getExpirationTime().before(new Date())){
             throw new AuthException("ID Token Expired");
         }
-        
+
         if(! claims.getIssuer().equals(issuer)){
             throw new AuthException("ID Token issuer "+claims.getIssuer()+" does not match");
         }
-        
+
         if(! claims.getAudience().contains(aud)){
-            throw new AuthException("ID Token audience "+claims.getAudience()+" does not match");            
+            throw new AuthException("ID Token audience "+claims.getAudience()+" does not match");
         }
-        
+        _log.debug("Requesting user info");
         UserInfoRequest userInfoReq = new UserInfoRequest(
                 userS,
                 accessTokenResponse.getBearerAccessToken());
-        
-        
+
+
         HTTPResponse userInfoHTTPResp = null;
         try {
             userInfoHTTPResp = userInfoReq.toHTTPRequest().send();
@@ -290,9 +290,10 @@ public class Authenticator {
         } catch (IOException ex) {
             _log.error(ex);
         }
-        
+
         UserInfoResponse userInfoResp = null;
-        
+
+        _log.debug("Get the user info response");
         try {
             userInfoResp = UserInfoResponse.parse(userInfoHTTPResp);
         } catch (ParseException ex) {
@@ -303,7 +304,8 @@ public class Authenticator {
             throw new AuthException("OpenId Connect server does not authenticate");
 
         UserInfoSuccessResponse successUserResponse = (UserInfoSuccessResponse) userInfoResp;
-        
+
+        _log.debug("User info generated for: " + successUserResponse.getUserInfo().getEmail().toString());
         return successUserResponse.getUserInfo();
     }
 
@@ -321,13 +323,13 @@ public class Authenticator {
         while(scanner.hasNext()){
            sb.append(scanner.next());
         }
-        
+
         String jString = sb.toString();
-        
+
         try {
             JSONObject json = JSONObjectUtils.parse(jString);
             JSONArray keyList = (JSONArray) json.get("keys");
-            
+
             for(Object key: keyList){
                 JSONObject obj = (JSONObject) key;
                 if(obj.get("kty").equals("RSA")){
@@ -337,7 +339,7 @@ public class Authenticator {
         } catch (ParseException ex) {
             _log.error(ex);
         }
-        
+
         return null;
     }
 

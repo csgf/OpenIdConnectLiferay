@@ -1,17 +1,17 @@
 /***********************************************************************
- *  Copyright (c) 2011: 
+ *  Copyright (c) 2011:
  *  Istituto Nazionale di Fisica Nucleare (INFN), Italy
  *  Consorzio COMETA (COMETA), Italy
- * 
+ *
  *  See http://www.infn.it and and http://www.consorzio-cometa.it for details on
  *  the copyright holders.
- * 
+ *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
- * 
+ *
  *  http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -51,7 +51,7 @@ import javax.servlet.http.HttpServletResponse;
 public class OpenIdConnectAutoLogin implements AutoLogin{
 
 	private static final Log _log = LogFactoryUtil.getLog(OpenIdConnectAutoLogin.class);
-	        
+
 	@Override
 	public String[] login(HttpServletRequest request, HttpServletResponse response)
 			throws AutoLoginException {
@@ -69,12 +69,15 @@ public class OpenIdConnectAutoLogin implements AutoLogin{
                     _log.error(ex);
                 }
             }
-            
+
             _log.debug("Check if the session is for login: "+request.getSession().getAttribute("LOGIN"));
             if(request.getSession().getAttribute("LOGIN") != null){
                 _log.debug("Remote Authentication performed. Retrieve the token");
                 State state = (State) request.getSession().getAttribute("LOGIN");
 
+								_log.debug("Request parameters: error=" + request.getParameter("error") +
+								                               " code=" + request.getParameter("code") +
+																							 " state=" + request.getParameter("state"));
                 if(request.getParameter("error")!=null){
                     try {
                         response.sendRedirect("/not_authorised");
@@ -83,56 +86,60 @@ public class OpenIdConnectAutoLogin implements AutoLogin{
                         _log.error(ex);
                     }
                 }
-                
+
                 if(request.getParameter("code")!=null &&
                         request.getParameter("state")!=null){
                     request.getSession().removeAttribute("LOGIN");
-                    
+
                     Authenticator authZ = new Authenticator(state);
-                    
+
                     UserInfo userInfo = null;
+										_log.debug("Requesting UserInfo");
                     try {
                         userInfo = authZ.getUserInfo(request);
-                        if(!(userInfo.getStringListClaim("edu_person_entitlements").contains("urn:mace:egi.eu:aai.egi.eu:member@vo.access.egi.eu") &&
-                                userInfo.getStringListClaim("edu_person_entitlements").contains("urn:mace:egi.eu:aai.egi.eu:vm_operator@vo.access.egi.eu"))) {
+												_log.debug("UserInfo retrieved for user: " + userInfo.toJSONObject().toString());
+                        if(!(userInfo.getStringListClaim("eduperson_entitlement").contains("urn:mace:egi.eu:aai.egi.eu:member@vo.access.egi.eu") &&
+                                userInfo.getStringListClaim("eduperson_entitlement").contains("urn:mace:egi.eu:aai.egi.eu:vm_operator@vo.access.egi.eu"))) {
                             try {
+															  _log.debug("UserInfo has not the correct edu_person_entitlements: urn:mace:egi.eu:aai.egi.eu:member@vo.access.egi.eu and urn:mace:egi.eu:aai.egi.eu:vm_operator@vo.access.egi.eu");
                                 response.sendRedirect("/not_authorised");
                                 return null;
                             } catch (IOException ex) {
                                 _log.error(ex);
-                            }                            
+                            }
                         }
-                        
+
                     } catch (AuthException ex) {
                         _log.error(ex);
                         return null;
                     }
-                    
+
+										_log.debug("Start user authentication");
                     String[] credentials = null;
                     long companyId = 0;
-                    
+
                     try {
                         companyId = PortalUtil.getCompany(request).getCompanyId();
-                        
+
                         String mail = userInfo.getEmail().toString();
                         _log.info("Check the mail: "+mail);
-                        
+
                         User user = null;
                         try{
                             user = UserLocalServiceUtil.getUserByEmailAddress(companyId, mail);
                         }
                         catch(NoSuchUserException ex){
-                            
+
                             String givenName;
                             String familyName;
-                            
+
                             if(userInfo.getGivenName()==null || userInfo.getGivenName().isEmpty()){
                                 givenName = userInfo.getName();
                             }
                             else{
                                 givenName = userInfo.getGivenName();
                             }
-                            
+
                             if(givenName!=null && !givenName.isEmpty()){
                                 if(userInfo.getFamilyName()!=null && !userInfo.getFamilyName().isEmpty()){
                                     familyName = userInfo.getFamilyName();
@@ -157,7 +164,7 @@ public class OpenIdConnectAutoLogin implements AutoLogin{
                                 givenName = "EGI";
                                 familyName = "USER "+ (int)(10000*Math.random());
                             }
-                                
+
                             _log.info("New user "+givenName+" "+familyName+" "+mail+" (id "+userInfo.getStringClaim("sub")+")");
                             SecureRandom random = new SecureRandom();
                             String pass = new BigInteger(130, random).toString(32);
@@ -185,13 +192,13 @@ public class OpenIdConnectAutoLogin implements AutoLogin{
                         credentials[2] = Boolean.TRUE.toString();
 
                         return credentials;
-                        
-                        
+
+
                     }
                     catch (Exception e) {
                             _log.error(StackTraceUtil.getStackTrace(e));
                             throw new AutoLoginException(e);
-                    }            
+                    }
                 }
             }
            return null;
